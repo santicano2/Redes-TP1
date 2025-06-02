@@ -7,53 +7,48 @@ import re
 HOST = "127.0.0.1" #localhost
 PORT = 65432
 DOMINIOS_VALIDOS = ["gmail.com", "hotmail.com"]
-VOCALES = "aeiou"
-CONSONANTES = "bcdfghjklmnñpqrstvwxyz"
 
-def generar_usuario(tam):
-	try:
-		longitud = int(tam)
+usuarios_activos = {}
 
-		if longitud < 5  or longitud > 20:
-			return False, "ERROR: La longitud debe ser entre 5 y 20 caracteres"
-		
-		usuario = random.choice(VOCALES) + random.choice(CONSONANTES)
+def procesar_nombre_completo(nombre_completo):
+	partes = nombre_completo.strip().split()
 
-		longitud_restante = longitud - 2
-		for _ in range(longitud_restante):
-			usuario += random.choice(VOCALES + CONSONANTES)
-
-		usuario = usuario.capitalize()
-
-		return True, f"Nombre de usuario generado: {usuario}"
-	except ValueError:
-		return False, "ERROR: La longitud debe ser un número entero"
-
-def validar_usuario(usuario):
-	if len(usuario) < 5 or len(usuario) > 20:
-		return False, "ERROR: El nombre de usuario debe tener entre 5 y 20 caracteres."
+	if len(partes) < 2:
+		return False, "ERROR: Debe ingresar al menos nombre y apellido"
 	
-	if any(char.isdigit() for char in usuario):
-		return False, "ERROR: El nombre de usuario no puede contener números."
-	
-	if not re.search(r'[aeiouAEIOU]', usuario):
-		return False, "ERROR: el nombre de usuario debe contener al menos una vocal."
-	
-	if not re.search(r'[bcdfghjklmnñpqrstvwxyzBCDFGHJKLMNÑPQRSTVWXYZ]', usuario):
-		return False, "ERROR: El nombre de usuario debe contener al menos una consonante."
-	
-	return True, "Nombre de usuario válido: " + usuario
+	# Remover numeros si hay
+	partes_limpias = []
+	for parte in partes:
+		parte_limpia = re.sub(r'[0-9]', '', parte)
+		if parte_limpia:
+			partes_limpias.append(parte_limpia)
 
-def generar_email(usuario):
-
-	is_valid, message = validar_usuario(usuario)
-	if not is_valid:
-		return False, message
+	if len(partes_limpias) < 2:
+		return False, "ERROR: El nombre no puede contener solo numeros"
 	
-	usuario = usuario.lower()
+	# Encontrar combinacion valida
+	combinaciones = [
+		partes_limpias[0] + partes_limpias[1],  # nombre + primer apellido
+    partes_limpias[0] + partes_limpias[-1], # nombre + ultimo apellido
+    partes_limpias[0] + partes_limpias[1][:3] if len(partes_limpias[1]) > 3 else partes_limpias[0] + partes_limpias[1]  # nombre + apellido truncado
+	]
 
+	for combinacion in combinaciones:
+		if 5 <= len(combinacion) <= 20:
+			# Verificar vocales y consonantes
+			if (re.search(r'[aeiouAEIOU]', combinacion) and 
+					re.search(r'[bcdfghjklmnñpqrstvwxyzBCDFGHJKLMNÑPQRSTVWXYZ]', combinacion)):
+					return True, combinacion.lower()
+	
+	return False, "ERROR: No se pudo generar un nombre de usuario válido con los datos proporcionados"
+
+def generar_email(addr):
+
+	if addr not in usuarios_activos:
+		return False, "ERROR: Primero debe generar o validar un nombre de usuario."
+	
+	usuario = usuarios_activos[addr].lower()
 	dominio = random.choice(DOMINIOS_VALIDOS)
-
 	email = f"{usuario}@{dominio}"
 
 	return True, f"Email generado: {email}"
@@ -71,36 +66,45 @@ def manejar_cliente(conn, addr):
 			data = data.strip()
 			print(f"[RECIBIDO] {addr}: {data}")
 
-			parts = data.split("|")
+			parts = data.split("|", 1)
 			command = parts[0]
 
-			if command == "USUARIO_VALIDAR":
-				is_valid, message = validar_usuario(parts[1])
+			# Generar usuario deesde nombre completo
+			if command == "USUARIO_GENERAR":
+				is_valid, result = procesar_nombre_completo(parts[1])
+				if is_valid:
+					usuarios_activos[addr] = result
+					message = f"Nombre de usuario generado: {result}"
+				else:
+					message = result
 				conn.sendall((message + "\n").encode('utf-8'))
-				print(f"[ENVIADO] {addr}: {message}")
-
-			elif command == "USUARIO_GENERAR":
-				is_valid, message = generar_usuario(parts[1])
-				conn.sendall((message + "\n").encode('utf-8'))
-				print(f"[ENVIADO] {addr}: {message}")
+				print(f"[ENVIADO] {addr}: {message}\n")
 
 			elif command == "EMAIL":
-				is_valid, message = generar_email(parts[1])
+				is_valid, message = generar_email(addr)
 				conn.sendall((message + "\n").encode('utf-8'))
-				print(f"[ENVIADO] {addr}: {message}")
+				print(f"[ENVIADO] {addr}: {message}\n")
 			
 			elif command == "DESCONECTAR":
 				connected = False
+
+				if addr in usuarios_activos:
+					del usuarios_activos[addr]
+
 				conn.sendall(("Desconexión exitosa\n").encode('utf-8'))
-				print(f"[ENVIADO] {addr}: Desconexión exitosa")
+				print(f"[ENVIADO] {addr}: Desconexión exitosa\n")
 
 			else:
 				conn.sendall(("Comando no reconocido\n").encode('utf-8'))
-				print(f"[ENVIADO] {addr}: Comando no reconocido")
+				print(f"[ENVIADO] {addr}: Comando no reconocido\n")
 		
 		except Exception as e:
 			print(f"[ERROR] {e}")
 			break
+
+	# Eliminar usuario al desconectar
+	if addr in usuarios_activos:
+		del usuarios_activos[addr]
 	
 	print(f"[DESCONEXIÓN] {addr} desconectado.")
 	conn.close()

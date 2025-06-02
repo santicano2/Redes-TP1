@@ -19,9 +19,11 @@ public class JavaClient {
 	public void conectarAServidor() {
 		try {
 			System.out.println("Conectando al servidor...");
+	
 			socket = new Socket(HOST, PORT);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
 			System.out.println("Conexión establecida con éxito.");
 		} catch (IOException e) {
 			System.out.println("No se pudo conectar al servidor: " + e.getMessage());
@@ -35,7 +37,7 @@ public class JavaClient {
 			out.println(comando);
 
 			String response = in.readLine();
-			System.out.println("Respuesta recibidia: " + response);
+			System.out.println("Respuesta recibida: " + response);
 
 			return response;
 		} catch (IOException e) {
@@ -46,10 +48,9 @@ public class JavaClient {
 
 	public void mostrarMenu() {
 		System.out.println("\n==== CLIENTE JAVA ====");
-		System.out.println("1. Validar nombre de usuario");
-		System.out.println("2. Generar nombre de usuario");
-		System.out.println("3. Generar email");
-		System.out.println("4. Desconectar");
+		System.out.println("1. Generar nombre de usuario");
+		System.out.println("2. Generar email");
+		System.out.println("3. Desconectar");
 		System.out.print("Seleccione una opción: ");
 	}
 
@@ -64,31 +65,22 @@ public class JavaClient {
 			try {
 				switch (opcion) {
 					case "1":
-						System.out.print("Ingrese el nombre de usuario a validar: ");
-						String usuario = scanner.nextLine();
-						String response = enviarComando("USUARIO_VALIDAR|" + usuario);
+						System.out.print("Ingrese su nombre completo (nombre y apellido): ");
+						String nombreCompleto = scanner.nextLine();
+						String response = enviarComando("USUARIO_GENERAR|" + nombreCompleto);
 						System.out.println("\nRespuesta del servidor: " + response);
 						break;
 
 					case "2":
-						System.out.print("Ingrese la longitud para el nombre de usuario (5-20): ");
-						String longitud = scanner.nextLine();
-						String genResponse = enviarComando("USUARIO_GENERAR|" + longitud);
-						System.out.println("\nRespuesta del servidor: " + genResponse);
-						break;
-
-					case "3":
-						System.out.print("Ingrese su nombre de usuario para generar el email: ");
-						String userEmail = scanner.nextLine();
-						String emailResponse = enviarComando("EMAIL|" + userEmail);
+						System.out.println("Generando correo electrónico basado en el nombre de usuario...");
+						String emailResponse = enviarComando("EMAIL");
 						System.out.println("\nRespuesta del servidor: " + emailResponse);
 						break;
 
-					case "4":
+					case "3":
 						System.out.println("Desconectando del servidor...");
 						enviarComando("DESCONECTAR");
 						corriendo = false;
-						System.out.println("Desconexión exitosa!");
 						break;
 
 					default:
@@ -106,14 +98,12 @@ public class JavaClient {
 	}
 
 	public void cerrarConexion() {
-		try {
-			System.out.println("Cerrando conexiones...");
-			
+		try {		
 			if (in != null) in.close();
 			if (out != null) out.close();
 			if (socket != null) socket.close();
 
-			System.out.println("Conexiones cerradas correctamente.");
+			System.out.println("Desconexión exitosa!");
 		} catch (IOException e) {
 			System.out.println("Error al cerrar la conexión: " + e.getMessage());
 		}

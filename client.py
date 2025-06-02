@@ -7,6 +7,7 @@ PORT = 65432
 
 def conectar_a_server():
 	cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	
 	try:
 		cliente.connect((HOST, PORT))
 		return cliente
@@ -23,10 +24,9 @@ def enviar_comando(cliente, command):
 
 def mostrar_menu():
 	print("\n==== CLIENTE PYTHON ====")
-	print("1. Validar nombre de usuario")
-	print("2. Generar nombre de usuario")
-	print("3. Generar email")
-	print("4. Desconectar")
+	print("1. Generar nombre de usuario")
+	print("2. Generar email")
+	print("3. Desconectar")
 	return input("Seleccionar una opción: ")
 
 def main():
@@ -38,24 +38,20 @@ def main():
 		opcion = mostrar_menu()
 
 		if opcion == "1":
-			usuario = input("Ingrese el nombre de usuario: ")
-			response = enviar_comando(cliente, f"USUARIO_VALIDAR|{usuario}")
+			nombre_completo = input("Ingrese su nombre completo (nombre y apellido): ")
+			response = enviar_comando(cliente, f"USUARIO_GENERAR|{nombre_completo}")
 			print(f"\nRespuesta del servidor: {response}")
-
+		
 		elif opcion == "2":
-			longitud = input("Ingrese la longitud para el nombre de usuario (5 a 20): ")
-			response = enviar_comando(cliente, f"USUARIO_GENERAR|{longitud}")
+			print("Generando correo electrónico basado en el nombre de usuario...")
+			response = enviar_comando(cliente, "EMAIL")
 			print(f"\nRespuesta del servidor: {response}")
 		
 		elif opcion == "3":
-			usuario = input("Ingrese el nombre de usuario para generar el email: ")
-			response = enviar_comando(cliente, f"EMAIL|{usuario}")
-			print(f"\nRespuesta del servidor: {response}")
-		
-		elif opcion == "4":
 			print("Desconectando del servidor...")
 			enviar_comando(cliente, "DESCONECTAR")
 			cliente.close()
+
 			print("Desconexión exitosa!")
 			break
 		
