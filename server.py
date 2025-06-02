@@ -24,7 +24,7 @@ def procesar_nombre_completo(nombre_completo):
 			partes_limpias.append(parte_limpia)
 
 	if len(partes_limpias) < 2:
-		return False, "ERROR: El nombre no puede contener solo numeros"
+		return False, "ERROR: El nombre no puede contener numeros"
 	
 	# Encontrar combinacion valida
 	combinaciones = [
