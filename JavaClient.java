@@ -7,20 +7,29 @@ public class JavaClient {
 	private static final String HOST = "127.0.0.1";
 	private static final int PORT = 65432;
 
-	private Socket socket;
-	private PrintWriter out;
-	private BufferedReader in;
-	private Scanner scanner;
+	private Socket socket;			// Socket de conexión TCP
+	private PrintWriter out; 	 	// Stream de salida al servidor
+	private BufferedReader in; 	// Stream de entrada del servidor
+	private Scanner scanner; 		// Scanner para input del usuario
 
 	public JavaClient() {
 		scanner = new Scanner(System.in);
 	}
 
+	/**
+	 * Establece conexión TCP con el servidor.
+	 * Inicializa los streams de entrada y salida.
+	 * 
+	 * Si no puede conectar, termina el programa.
+	*/
 	public void conectarAServidor() {
 		try {
 			System.out.println("Conectando al servidor...");
 	
+			// Crea socket TCP hacia el servidor
 			socket = new Socket(HOST, PORT);
+
+			// Inicializa streams de comunicación
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -31,6 +40,11 @@ public class JavaClient {
 		}
 	}
 
+	/**
+	 * Envía un comando al servidor y recibe la respuesta.
+	 * 
+	 * comando Comando a enviar al servidor
+	*/
 	public String enviarComando(String comando) {
 		try {
 			System.out.println("Enviando comando: " + comando);
@@ -54,6 +68,9 @@ public class JavaClient {
 		System.out.print("Seleccione una opción: ");
 	}
 
+	/**
+	 * Función principal que maneja la interacción con el usuario.
+	*/
 	public void run() {
 		conectarAServidor();
 
@@ -65,6 +82,7 @@ public class JavaClient {
 			try {
 				switch (opcion) {
 					case "1":
+						// ======= GENERAR NOMBRE DE USUARIO =======
 						System.out.print("Ingrese su nombre completo (nombre y apellido): ");
 						String nombreCompleto = scanner.nextLine();
 						String response = enviarComando("USUARIO_GENERAR|" + nombreCompleto);
@@ -72,12 +90,14 @@ public class JavaClient {
 						break;
 
 					case "2":
+						// ======= GENERAR EMAIL =======
 						System.out.println("Generando correo electrónico basado en el nombre de usuario...");
 						String emailResponse = enviarComando("EMAIL");
 						System.out.println("\nRespuesta del servidor: " + emailResponse);
 						break;
 
 					case "3":
+						// ======= DESCONECTAR =======
 						System.out.println("Desconectando del servidor...");
 						enviarComando("DESCONECTAR");
 						corriendo = false;
@@ -97,6 +117,9 @@ public class JavaClient {
 		cerrarConexion();
 	}
 
+	/**
+	 * Cierra los streams y el socket de conexión.
+	*/
 	public void cerrarConexion() {
 		try {		
 			if (in != null) in.close();
