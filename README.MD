@@ -20,6 +20,7 @@ Este repositorio contiene la implementación de un sistema de sockets compuesto 
 ├── server.py         # Servidor implementado en Python
 ├── python_client.py  # Cliente implementado en Python
 ├── JavaClient.java   # Cliente implementado en Java
+├── JavaClient.class  # Clase del cliente de Java
 └── README.md         # Este archivo
 ```
 
@@ -27,20 +28,13 @@ Este repositorio contiene la implementación de un sistema de sockets compuesto 
 
 El sistema implementa:
 
-1. **Validación de nombre de usuario**:
+1. **Generación y validación de nombre de usuario**:
 
-   - Longitud entre 5 y 20 caracteres
-   - Debe contener al menos una vocal
-   - Debe contener al menos una consonante
-   - No puede contener números
-
-2. **Generación de nombre de usuario**:
-
-   - Basado en la longitud especificada por el cliente (entre 5 y 20 caracteres)
+   - Basado en la longitud especificada (entre 5 y 20 caracteres)
    - Siempre incluye al menos una vocal y una consonante
    - No contiene números
 
-3. **Generación de correo electrónico**:
+2. **Generación de correo electrónico**:
    - Basado en el nombre de usuario
    - Dominios válidos: gmail.com y hotmail.com
    - Validación de formato correcto
@@ -81,10 +75,9 @@ java JavaClient
 
 ### En cualquiera de los clientes:
 
-1. Seleccione la opción 1 para validar un nombre de usuario
-2. Seleccione la opción 2 para generar un nombre de usuario basado en la longitud
-3. Seleccione la opción 3 para generar una dirección de correo electrónico
-4. Seleccione la opción 4 para salir
+1. Seleccione la opción 1 para generar un nombre de usuario
+2. Seleccione la opción 2 para generar una dirección de correo electrónico
+3. Seleccione la opción 3 para salir
 
 ## Notas importantes
 
