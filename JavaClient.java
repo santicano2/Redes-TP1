@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class JavaClient {
 	// CONFIG
 	private static final String HOST = "127.0.0.1";
-	private static final int PORT = 65432;
+	private static final int PORT = 25565;
 
 	private Socket socket;			// Socket de conexión TCP
 	private PrintWriter out; 	 	// Stream de salida al servidor

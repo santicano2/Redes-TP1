@@ -3,7 +3,7 @@ import sys
 
 # CONFIG
 HOST = "127.0.0.1" #localhost
-PORT = 65432
+PORT = 25565
 
 def conectar_a_server():
 	
